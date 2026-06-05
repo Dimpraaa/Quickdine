@@ -10,15 +10,17 @@
             background-color: #f0f0f0;
             margin: 0;
             padding: 20px;
-            display: flex;
-            justify-content: center;
+            text-align: center;
         }
 
         .receipt {
             background-color: #fff;
-            width: 300px; /* Lebar standar printer thermal 80mm */
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
             padding: 20px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: left;
         }
 
         .text-center { text-align: center; }
@@ -26,39 +28,31 @@
         .font-bold { font-weight: bold; }
         .text-sm { font-size: 12px; }
         .text-xs { font-size: 10px; }
-        .mb-2 { margin-bottom: 8px; }
-        .mb-4 { margin-bottom: 16px; }
-        .mt-4 { margin-top: 16px; }
         
         .divider {
             border-top: 1px dashed #000;
             margin: 10px 0;
         }
 
-        .item-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 4px;
+        table {
+            width: 100%;
+            border-collapse: collapse;
         }
 
-        .item-name { width: 60%; }
-        .item-qty { width: 10%; text-align: center; }
-        .item-total { width: 30%; text-align: right; }
+        td {
+            vertical-align: top;
+        }
 
         @media print {
             body {
                 background-color: transparent;
                 padding: 0;
-                display: block;
             }
             .receipt {
-                width: 100%;
-                max-width: 300px;
+                max-width: 100%;
                 box-shadow: none;
-                margin: 0 auto;
                 padding: 0;
             }
-            /* Hilangkan elemen browser saat print */
             @page {
                 margin: 0;
             }
@@ -68,7 +62,7 @@
 <body onload="window.print()">
 
     <div class="receipt">
-        <div class="text-center mb-4">
+        <div class="text-center">
             <h2 style="margin:0;">QuickDine</h2>
             <p class="text-sm" style="margin:4px 0;">Jl. Contoh Restoran No. 123</p>
             <p class="text-sm" style="margin:4px 0;">Telp: 0812-3456-7890</p>
@@ -76,88 +70,93 @@
 
         <div class="divider"></div>
 
-        <div class="text-sm mb-2">
-            <div style="display:flex; justify-content:space-between;">
-                <span>Waktu:</span>
-                <span>{{ $order->created_at->format('d/m/Y H:i') }}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between;">
-                <span>ID TRX:</span>
-                <span>{{ $order->transaction_id }}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between;">
-                <span>Tipe:</span>
-                <span>{{ $order->order_type == 'dine_in' ? 'Dine In' : 'Take Away' }}</span>
-            </div>
-            @if($order->table)
-            <div style="display:flex; justify-content:space-between;">
-                <span>Meja:</span>
-                <span>{{ $order->table->table_number }}</span>
-            </div>
-            @endif
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="text-sm font-bold item-row" style="margin-bottom: 8px;">
-            <div class="item-name">Item</div>
-            <div class="item-qty">Qty</div>
-            <div class="item-total">Harga</div>
-        </div>
-
         <div class="text-sm">
-            @foreach($order->items as $item)
-            <div class="item-row">
-                <div class="item-name">{{ $item->menu->name ?? 'Menu Dihapus' }}</div>
-                <div class="item-qty">{{ $item->quantity }}</div>
-                <div class="item-total">{{ number_format($item->subtotal, 0, ',', '.') }}</div>
-            </div>
-            @endforeach
+            <table>
+                <tr>
+                    <td>Waktu:</td>
+                    <td class="text-right">{{ $order->created_at->format('d/m/Y H:i') }}</td>
+                </tr>
+                <tr>
+                    <td>ID TRX:</td>
+                    <td class="text-right">{{ $order->transaction_id }}</td>
+                </tr>
+                <tr>
+                    <td>Tipe:</td>
+                    <td class="text-right">{{ $order->order_type == 'dine_in' ? 'Dine In' : 'Take Away' }}</td>
+                </tr>
+                @if($order->table)
+                <tr>
+                    <td>Meja:</td>
+                    <td class="text-right">{{ $order->table->table_number }}</td>
+                </tr>
+                @endif
+            </table>
         </div>
 
         <div class="divider"></div>
 
         <div class="text-sm">
-            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                <span>Subtotal:</span>
-                <span>{{ number_format($order->total_price - ($order->total_price / 1.1 * 0.1), 0, ',', '.') }}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                <span>Pajak (10%):</span>
-                <span>{{ number_format($order->total_price / 1.1 * 0.1, 0, ',', '.') }}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; margin-top:8px; font-weight:bold; font-size:14px;">
-                <span>TOTAL:</span>
-                <span>Rp {{ number_format($order->total_price, 0, ',', '.') }}</span>
-            </div>
+            <table>
+                <tr class="font-bold">
+                    <td style="width: 50%;">Item</td>
+                    <td style="width: 15%; text-align: center;">Qty</td>
+                    <td style="width: 35%;" class="text-right">Harga</td>
+                </tr>
+                @foreach($order->items as $item)
+                <tr>
+                    <td>{{ $item->menu->name ?? 'Menu Dihapus' }}</td>
+                    <td style="text-align: center;">{{ $item->quantity }}</td>
+                    <td class="text-right">{{ number_format($item->subtotal, 0, ',', '.') }}</td>
+                </tr>
+                @endforeach
+            </table>
         </div>
 
         <div class="divider"></div>
 
         <div class="text-sm">
-            <div style="display:flex; justify-content:space-between;">
-                <span>Metode Pembayaran:</span>
-                <span style="text-transform: uppercase;">{{ $order->payment_method == 'cash' ? 'TUNAI / CASH' : ($order->payment_method == 'qris' ? 'TRANSFER/QRIS' : $order->payment_method) }}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between;">
-                <span>Status:</span>
-                <span style="text-transform: uppercase;">{{ $order->payment_status == 'paid' ? 'LUNAS' : 'BELUM BAYAR' }}</span>
-            </div>
+            <table>
+                <tr>
+                    <td>Subtotal:</td>
+                    <td class="text-right">{{ number_format($order->total_price - ($order->total_price / 1.1 * 0.1), 0, ',', '.') }}</td>
+                </tr>
+                <tr>
+                    <td>Pajak (10%):</td>
+                    <td class="text-right">{{ number_format($order->total_price / 1.1 * 0.1, 0, ',', '.') }}</td>
+                </tr>
+                <tr class="font-bold" style="font-size: 14px;">
+                    <td style="padding-top: 8px;">TOTAL:</td>
+                    <td class="text-right" style="padding-top: 8px;">Rp {{ number_format($order->total_price, 0, ',', '.') }}</td>
+                </tr>
+            </table>
         </div>
 
-        <div class="divider mt-4"></div>
+        <div class="divider"></div>
 
-        <div class="text-center mt-4">
+        <div class="text-sm">
+            <table>
+                <tr>
+                    <td>Pembayaran:</td>
+                    <td class="text-right" style="text-transform: uppercase;">{{ $order->payment_method == 'cash' ? 'TUNAI/CASH' : ($order->payment_method == 'qris' ? 'QRIS' : $order->payment_method) }}</td>
+                </tr>
+                <tr>
+                    <td>Status:</td>
+                    <td class="text-right" style="text-transform: uppercase;">{{ $order->payment_status == 'paid' ? 'LUNAS' : 'BELUM BAYAR' }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="divider" style="margin-top: 16px;"></div>
+
+        <div class="text-center" style="margin-top: 16px;">
             <p class="font-bold text-sm" style="margin:4px 0;">Terima Kasih</p>
             <p class="text-xs" style="margin:4px 0;">Silakan datang kembali</p>
         </div>
     </div>
 
-    <!-- Script to close window after printing if opened as a popup -->
     <script>
         window.onafterprint = function() {
             // Optional: close the window after printing
-            // window.close();
         };
     </script>
 </body>
