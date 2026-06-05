@@ -369,4 +369,41 @@ class OrderController extends Controller
             return redirect()->back()->with('error', 'Gagal membatalkan pesanan.');
         }
     }
+    public function reorder(Request $request, $transaction_id)
+    {
+        try {
+            $order = Order::with('items.menu')->where('transaction_id', $transaction_id)->firstOrFail();
+            
+            // Siapkan keranjang dengan item dari pesanan lama
+            $restoreCart = [];
+            foreach ($order->items as $item) {
+                // Hanya tambahkan jika menu masih aktif dan stok tersedia
+                if ($item->menu && $item->menu->is_active && $item->menu->stock > 0) {
+                    // Gunakan harga saat ini (price), bukan price_at_order, agar sinkron dengan menu saat ini
+                    $restoreCart[] = [
+                        'id' => $item->menu_id,
+                        'name' => $item->menu->name,
+                        'price' => $item->menu->price,
+                        'quantity' => $item->quantity,
+                        'image' => $item->menu->image
+                    ];
+                }
+            }
+            
+            if (empty($restoreCart)) {
+                return redirect()->back()->with('error', 'Maaf, menu dari pesanan ini sudah tidak tersedia atau kehabisan stok.');
+            }
+            
+            // Set session restore_cart agar diambil oleh halaman menu
+            session(['restore_cart' => $restoreCart]);
+            
+            $tableNum = session('current_table', $order->table ? $order->table->table_number : '1');
+            if (empty($tableNum)) $tableNum = '1';
+            
+            return redirect()->route('menu.index', $tableNum)->with('success', 'Menu dari pesanan ini telah dimasukkan ke keranjang Anda!');
+            
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal melakukan pesan lagi.');
+        }
+    }
 }

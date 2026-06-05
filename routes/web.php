@@ -45,6 +45,7 @@ Route::get('/order/{transaction_id}/receipt/pdf', [OrderController::class, 'down
 Route::post('/order/{transaction_id}/review', [OrderController::class, 'submitReview'])->name('order.review');
 Route::post('/order/auto-cancel', [OrderController::class, 'autoCancel'])->name('order.autoCancel');
 Route::post('/order/{transaction_id}/cancel-and-reorder', [OrderController::class, 'cancelAndReorder'])->name('order.cancelAndReorder');
+Route::post('/order/{transaction_id}/reorder', [OrderController::class, 'reorder'])->name('order.reorder');
 Route::post('/payment/verify', [OrderController::class, 'verifyPayment'])->name('payment.verify');
 Route::post('/call-waiter', [MenuController::class, 'callWaiter'])->name('call.waiter');
 

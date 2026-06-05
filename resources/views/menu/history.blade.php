@@ -8,6 +8,7 @@
     <title>Riwayat Pesanan - QuickDine</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    @vite(['resources/js/app.js'])
     <script>
         tailwind.config = {
             theme: {
@@ -146,9 +147,19 @@
                     <p class="font-black text-secondary text-lg">Rp {{ number_format($order->total_price, 0, ',', '.') }}</p>
                 </div>
 
-                <button onclick="openReceiptModal({{ $order->id }})" class="bg-secondary hover:bg-[#20150F] text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors shadow-sm flex items-center gap-2 uppercase tracking-wide">
-                    <i class="fas fa-file-invoice"></i> Lihat Struk
-                </button>
+                <div class="flex gap-2">
+                    @if($order->status == 'completed' || $order->status == 'served')
+                    <form action="{{ route('order.reorder', ['transaction_id' => $order->transaction_id]) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="bg-primary hover:bg-primaryDark text-white px-3 py-2 rounded-xl text-xs font-bold transition-colors shadow-sm flex items-center justify-center" title="Pesan Lagi">
+                            <i class="fas fa-redo-alt"></i>
+                        </button>
+                    </form>
+                    @endif
+                    <button onclick="openReceiptModal({{ $order->id }})" class="bg-secondary hover:bg-[#20150F] text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors shadow-sm flex items-center gap-2 uppercase tracking-wide">
+                        <i class="fas fa-file-invoice"></i> Lihat Struk
+                    </button>
+                </div>
             </div>
 
             @if(!in_array($order->status, ['pending', 'preparing', 'cancelled']))
@@ -170,8 +181,8 @@
                         <div class="flex gap-1 mb-2">
                             <input type="hidden" name="rating" id="rating-{{ $order->id }}" value="5">
                             @for($i=1; $i<=5; $i++)
-                                <button type="button" onclick="setRating({{ $order->id }}, {{ $i }})" class="star-btn-{{ $order->id }} text-yellow-400 text-sm focus:outline-none transition-colors active:scale-90">
-                                    <i class="fas fa-star"></i>
+                                <button type="button" onclick="setRating({{ $order->id }}, {{ $i }})" onmouseover="hoverRating({{ $order->id }}, {{ $i }})" onmouseout="resetRatingDisplay({{ $order->id }})" class="star-btn-{{ $order->id }} text-yellow-400 text-sm focus:outline-none transition-transform hover:scale-110 active:scale-90">
+                                    <i class="fas fa-star drop-shadow-sm"></i>
                                 </button>
                             @endfor
                         </div>
@@ -443,6 +454,45 @@
                 textToggle.innerText = `Lihat ${sisaItem} item lainnya`;
             }
         }
+
+        function hoverRating(orderId, rating) {
+            const stars = document.querySelectorAll('.star-btn-' + orderId);
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.replace('text-gray-300', 'text-yellow-400');
+                    star.classList.replace('text-yellow-500', 'text-yellow-400');
+                } else {
+                    star.classList.replace('text-yellow-400', 'text-gray-300');
+                    star.classList.replace('text-yellow-500', 'text-gray-300');
+                }
+            });
+        }
+
+        function resetRatingDisplay(orderId) {
+            const currentRating = document.getElementById('rating-' + orderId).value;
+            setRating(orderId, currentRating);
+        }
+
+        // Smart Auto-Refresh dengan Laravel Echo (WebSockets)
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.Echo) {
+                window.Echo.channel('kitchen')
+                    .listen('KitchenUpdated', (e) => {
+                        console.log('Update status dari dapur diterima, merefresh halaman...');
+                        // Tambahkan overlay loading halus sebelum refresh
+                        const loader = document.createElement('div');
+                        loader.className = 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm transition-opacity';
+                        loader.innerHTML = '<div class="bg-white p-4 rounded-xl shadow-2xl flex items-center gap-3"><i class="fas fa-circle-notch fa-spin text-primary text-xl"></i><span class="font-bold text-secondary">Memperbarui Status...</span></div>';
+                        document.body.appendChild(loader);
+                        
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 800);
+                    });
+            } else {
+                console.warn('Laravel Echo is not initialized. Make sure reverb server is running and vite is built.');
+            }
+        });
     </script>
 </body>
 
