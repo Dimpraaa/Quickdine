@@ -343,7 +343,7 @@
                     closeConfirmModal();
                 });
 
-                window.updateQty = function(id, change) {
+                window.updateQty = function(id, change, isFromModal = false) {
                     const menu = menus.find(m => m.id === id);
                     if (change > 0) {
                         const currentQty = cart[id] ? cart[id].qty : 0;
@@ -363,25 +363,34 @@
                         cart[id].qty += change;
                         if (cart[id].qty <= 0) {
                             cart[id].qty -= change; // kembalikan ke qty sebelumnya sementara
-                            showConfirmModal(
-                                'Hapus Item',
-                                `Apakah Anda yakin ingin menghapus ${cart[id].name} dari pesanan?`,
-                                function() {
-                                    delete cart[id];
-                                    showToast('Item dihapus dari pesanan');
-                                    renderMenu();
-                                    updateCartUI();
-                                    const modal = document.getElementById('checkout-modal');
-                                    if (!modal.classList.contains('hidden')) {
-                                        openCheckoutModal();
+                            
+                            if (isFromModal) {
+                                showConfirmModal(
+                                    'Hapus Item',
+                                    `Apakah Anda yakin ingin menghapus ${cart[id].name} dari pesanan?`,
+                                    function() {
+                                        delete cart[id];
+                                        renderMenu();
+                                        updateCartUI();
+                                        const modal = document.getElementById('checkout-modal');
+                                        if (!modal.classList.contains('hidden')) {
+                                            openCheckoutModal();
+                                        }
                                     }
-                                }
-                            );
-                            return; // Keluar tanpa update UI agar keranjang tidak berkedip
+                                );
+                                return; // Keluar tanpa update UI agar keranjang tidak berkedip
+                            } else {
+                                delete cart[id];
+                            }
                         }
                     }
                     renderMenu();
                     updateCartUI();
+                    
+                    const modal = document.getElementById('checkout-modal');
+                    if (modal && !modal.classList.contains('hidden')) {
+                        openCheckoutModal();
+                    }
                 };
 
                 window.updateNote = function(id, note) {
