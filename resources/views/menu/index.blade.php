@@ -118,14 +118,14 @@
 
             <div class="px-4 pb-4">
                 <div class="flex gap-2 relative">
+                    <button id="call-waiter-btn" onclick="callWaiter()" class="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-3 py-2 rounded-xl flex items-center justify-center transition-all shadow-sm active:scale-95 shrink-0" title="Panggil Pelayan">
+                        <i class="fas fa-bell text-sm"></i>
+                        <span id="call-waiter-text" class="text-[10px] ml-1.5 font-bold whitespace-nowrap">Panggil Pelayan</span>
+                    </button>
                     <div class="relative flex-1">
                         <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-primary/70 text-sm"></i>
                         <input type="text" id="search-input" placeholder="Cari menu favoritmu..." class="w-full bg-black/20 text-white border border-white/5 text-sm rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all placeholder-white/30 font-medium shadow-inner">
                     </div>
-                    <button id="call-waiter-btn" onclick="callWaiter()" class="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-3 py-2 rounded-xl flex items-center justify-center transition-all shadow-sm active:scale-95" title="Panggil Pelayan">
-                        <i class="fas fa-bell text-sm"></i>
-                        <span id="call-waiter-text" class="text-[10px] ml-1.5 font-bold whitespace-nowrap">Panggil Pelayan</span>
-                    </button>
                 </div>
             </div>
 
