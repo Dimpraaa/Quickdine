@@ -163,8 +163,8 @@
             <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
                 <div class="relative bg-white rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:max-w-sm w-full opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" id="confirm-panel">
                     <div class="bg-white px-6 py-6 text-center">
-                        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
-                            <i class="fas fa-exclamation-triangle text-2xl text-red-600"></i>
+                        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4" id="confirm-icon-bg">
+                            <i class="fas fa-exclamation-triangle text-2xl text-red-600" id="confirm-icon"></i>
                         </div>
                         <h3 class="text-xl leading-6 font-black text-secondary mb-2" id="confirm-title">Hapus Item</h3>
                         <p class="text-sm text-[#8C837C] font-medium" id="confirm-message">Apakah Anda yakin ingin menghapus item ini?</p>
@@ -306,9 +306,23 @@
 
                 let pendingConfirmAction = null;
 
-                window.showConfirmModal = function(title, message, onConfirm) {
+                window.showConfirmModal = function(title, message, onConfirm, confirmText = 'Ya, Hapus', isDanger = true) {
                     document.getElementById('confirm-title').innerText = title;
                     document.getElementById('confirm-message').innerText = message;
+                    
+                    const btn = document.getElementById('confirm-btn');
+                    btn.innerText = confirmText;
+                    
+                    if (isDanger) {
+                        btn.className = 'flex-1 bg-red-600 border-2 border-red-600 text-white font-bold rounded-xl px-4 py-3 hover:bg-red-700 hover:border-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600';
+                        document.getElementById('confirm-icon-bg').className = 'mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4';
+                        document.getElementById('confirm-icon').className = 'fas fa-exclamation-triangle text-2xl text-red-600';
+                    } else {
+                        btn.className = 'flex-1 bg-primary border-2 border-primary text-white font-bold rounded-xl px-4 py-3 hover:bg-primaryDark hover:border-primaryDark transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary';
+                        document.getElementById('confirm-icon-bg').className = 'mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 mb-4';
+                        document.getElementById('confirm-icon').className = 'fas fa-bell text-2xl text-primary';
+                    }
+
                     pendingConfirmAction = onConfirm;
                     
                     const modal = document.getElementById('confirm-modal');
@@ -641,44 +655,52 @@
                     }, 3000);
                 };
 
-                window.callWaiter = async function() {
+                window.callWaiter = function() {
                     if (waiterCooldown > 0) return;
 
-                    const btn = document.getElementById('call-waiter-btn');
-                    const text = document.getElementById('call-waiter-text');
-                    
-                    try {
-                        const response = await fetch('/call-waiter', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            },
-                            body: JSON.stringify({ table_number: tableNumber })
-                        });
-                        
-                        const data = await response.json();
-                        if (data.success) {
-                            showToast('Pelayan segera menuju meja Anda.', 'info');
+                    showConfirmModal(
+                        'Panggil Pelayan',
+                        'Apakah Anda yakin membutuhkan bantuan pelayan saat ini?',
+                        async function() {
+                            const btn = document.getElementById('call-waiter-btn');
+                            const text = document.getElementById('call-waiter-text');
                             
-                            // Start Cooldown 60s
-                            waiterCooldown = 60;
-                            btn.classList.add('opacity-50', 'cursor-not-allowed');
-                            
-                            waiterInterval = setInterval(() => {
-                                waiterCooldown--;
-                                text.innerText = `Tunggu ${waiterCooldown}s`;
+                            try {
+                                const response = await fetch('/call-waiter', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                    },
+                                    body: JSON.stringify({ table_number: tableNumber })
+                                });
                                 
-                                if (waiterCooldown <= 0) {
-                                    clearInterval(waiterInterval);
-                                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
-                                    text.innerText = 'Panggil Pelayan';
+                                const data = await response.json();
+                                if (data.success) {
+                                    showToast('Pelayan segera menuju meja Anda.', 'info');
+                                    
+                                    // Start Cooldown 60s
+                                    waiterCooldown = 60;
+                                    btn.classList.add('opacity-50', 'cursor-not-allowed');
+                                    
+                                    waiterInterval = setInterval(() => {
+                                        waiterCooldown--;
+                                        text.innerText = `Tunggu ${waiterCooldown}s`;
+                                        
+                                        if (waiterCooldown <= 0) {
+                                            clearInterval(waiterInterval);
+                                            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                                            text.innerText = 'Panggil Pelayan';
+                                        }
+                                    }, 1000);
                                 }
-                            }, 1000);
-                        }
-                    } catch (error) {
-                        showToast('Gagal memanggil pelayan. Periksa koneksi Anda.', 'error');
-                    }
+                            } catch (error) {
+                                showToast('Gagal memanggil pelayan. Periksa koneksi Anda.', 'error');
+                            }
+                        },
+                        'Ya, Panggil',
+                        false
+                    );
                 };
 
                 let isProcessingCheckout = false;
