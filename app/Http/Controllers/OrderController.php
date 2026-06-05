@@ -388,7 +388,7 @@ class OrderController extends Controller
                         'name' => $item->menu->name,
                         'price' => $item->menu->price,
                         'quantity' => $item->quantity,
-                        'image' => $item->menu->image
+                        'image_url' => $item->menu->image_url
                     ];
                 }
             }

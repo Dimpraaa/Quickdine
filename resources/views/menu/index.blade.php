@@ -448,7 +448,7 @@
                         itemsHtml += `
                             <div class="bg-white p-4 rounded-2xl shadow-sm border border-[#EAE3D9] mb-3 relative group">
                                 <div class="flex gap-4 items-center">
-                                    <img src="${escapeHtml(item.image_url) || 'https://via.placeholder.com/100'}" alt="${escapeHtml(item.name)}" onerror="this.src='https://via.placeholder.com/100?text=Menu'" class="w-16 h-16 object-cover rounded-xl shadow-sm border border-[#F3EFE9]">
+                                    <img src="${escapeHtml(item.image_url) || 'https://via.placeholder.com/100'}" alt="${escapeHtml(item.name)}" onerror="this.onerror=null; this.src='https://via.placeholder.com/100?text=Menu'" class="w-16 h-16 object-cover rounded-xl shadow-sm border border-[#F3EFE9]">
                                     <div class="flex-1">
                                         <h4 class="font-bold text-secondary text-sm leading-tight mb-1 pr-6 line-clamp-2">${escapeHtml(item.name)}</h4>
                                         <span class="text-xs text-primary font-bold inline-block">${formatRp(item.price)}</span>
