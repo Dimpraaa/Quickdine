@@ -151,8 +151,8 @@
                     @if($order->status == 'completed' || $order->status == 'served')
                     <form action="{{ route('order.reorder', ['transaction_id' => $order->transaction_id]) }}" method="POST">
                         @csrf
-                        <button type="submit" class="bg-primary hover:bg-primaryDark text-white px-3 py-2 rounded-xl text-xs font-bold transition-colors shadow-sm flex items-center justify-center" title="Pesan Lagi">
-                            <i class="fas fa-redo-alt"></i>
+                        <button type="submit" class="bg-primary hover:bg-primaryDark text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors shadow-sm flex items-center gap-2 uppercase tracking-wide">
+                            <i class="fas fa-redo-alt"></i> Pesan Lagi
                         </button>
                     </form>
                     @endif
