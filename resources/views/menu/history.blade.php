@@ -263,9 +263,16 @@
                             </div>
                         </div>
 
-                        <div class="text-center mt-8 mb-2 text-[10px] text-gray-500 font-mono">
+                        <div class="text-[12px] text-gray-800 font-mono mt-4 border-t-2 border-dashed border-gray-400 pt-3 text-center">
+                            <p class="font-bold mb-1">AKSES WIFI</p>
+                            <p class="text-[11px]">SSID: <span class="font-bold">QuickDine_Guest</span></p>
+                            <p class="text-[11px]">Pass: <span class="font-bold">makanenak123</span></p>
+                        </div>
+
+                        <div class="text-center mt-4 mb-2 text-[10px] text-gray-500 font-mono border-t-2 border-dashed border-gray-400 pt-4">
                             <p>Terima kasih atas kunjungan Anda!</p>
-                            <p>-- QuickDine System --</p>
+                            <p class="mb-1">Silakan datang kembali</p>
+                            <p class="font-bold text-gray-700">IG: @quickdine.id</p>
                         </div>
                     </div>
                 </div>
