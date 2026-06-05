@@ -105,9 +105,17 @@ php artisan migrate:fresh --seed
 
 _Perintah ini akan membuat semua struktur tabel dan mengisi data awal (dummy data) termasuk akun admin utama._
 
-### 5. Menjalankan Aplikasi
+### 5. Build Frontend (Satu Kali Saja)
 
-Aplikasi ini membutuhkan **3 terminal (command prompt) terpisah** yang berjalan secara bersamaan agar fitur _real-time_ berfungsi:
+Sebelum menjalankan aplikasi untuk presentasi, pastikan Anda mem-build frontend agar dapat diakses dari perangkat lain (HP) dengan sempurna tanpa error CSS.
+
+```bash
+npm run build
+```
+
+### 6. Menjalankan Aplikasi & Ngrok (Untuk Midtrans)
+
+Aplikasi ini membutuhkan **3 terminal (command prompt) terpisah** yang berjalan secara bersamaan agar fitur _real-time_ dan _payment gateway_ berfungsi:
 
 **Terminal 1 (Menjalankan Web Server):**
 
@@ -118,14 +126,15 @@ php artisan serve --host=0.0.0.0
 **Terminal 2 (Menjalankan WebSockets/Reverb):**
 
 ```bash
-php artisan reverb:start
+php artisan reverb:start --host=0.0.0.0
 ```
 
-**Terminal 3 (Menjalankan Vite Asset Bundler):**
+**Terminal 3 (Menjalankan Ngrok untuk Webhook Midtrans):**
 
 ```bash
-npm run dev
+ngrok http 8000
 ```
+_Catatan: Copy URL Ngrok (https) yang muncul dan masukkan ke Dashboard Midtrans Anda (Settings -> Payment -> Payment Notification URL) diakhiri dengan `/midtrans/webhook`._
 
 ---
 
