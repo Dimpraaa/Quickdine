@@ -35,6 +35,9 @@ class OrderController extends Controller
                 session(['guest_order_ids' => $guestOrders]);
             }
 
+            // Hapus memori Pesan Lagi setelah pesanan berhasil dibuat
+            session()->forget('restore_cart');
+
             $response = [
                 'success' => true,
                 'redirect_url' => route('order.success', ['transaction_id' => $order->transaction_id]),

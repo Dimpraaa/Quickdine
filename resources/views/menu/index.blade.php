@@ -768,8 +768,8 @@
                     setTimeout(() => showToast('{{ session("error") }}', 'error'), 500);
                 @endif
                 
-                // Cek apakah ada session restore_cart (Fitur Ubah Metode Pembayaran)
-                let restoreCartData = @json(session('restore_cart', []));
+                // Cek apakah ada session restore_cart (Fitur Ubah Metode Pembayaran / Pesan Lagi)
+                let restoreCartData = @json(session()->pull('restore_cart', []));
                 if (restoreCartData && restoreCartData.length > 0) {
                     restoreCartData.forEach(item => {
                         cart[item.id] = {
