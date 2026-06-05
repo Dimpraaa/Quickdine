@@ -34,11 +34,10 @@ class MenuController extends Controller
         ]);
 
         $table = \App\Models\Table::where('table_number', $request->table_number)->first();
-        if ($table) {
+        if ($table && !$table->needs_waiter) {
             $table->update(['needs_waiter' => true]);
+            broadcast(new \App\Events\KitchenUpdated());
         }
-
-        broadcast(new \App\Events\KitchenUpdated());
 
         return response()->json(['success' => true]);
     }

@@ -344,12 +344,14 @@ class OrderController extends Controller
                 if ($item->menu) {
                     $item->menu->increment('stock', $item->quantity);
                     
+                    $qty = min($item->quantity, $item->menu->stock);
+                    
                     $restoreCart[] = [
                         'id' => $item->menu_id,
                         'name' => $item->menu->name,
                         'price' => $item->menu->price,
-                        'quantity' => $item->quantity,
-                        'image' => $item->menu->image
+                        'quantity' => $qty,
+                        'image_url' => $item->menu->image_url
                     ];
                 }
             }
@@ -382,12 +384,13 @@ class OrderController extends Controller
             foreach ($order->items as $item) {
                 // Hanya tambahkan jika menu masih ada dan stok tersedia
                 if ($item->menu && $item->menu->stock > 0) {
+                    $qty = min($item->quantity, $item->menu->stock);
                     // Gunakan harga saat ini (price), bukan price_at_order, agar sinkron dengan menu saat ini
                     $restoreCart[] = [
                         'id' => $item->menu_id,
                         'name' => $item->menu->name,
                         'price' => $item->menu->price,
-                        'quantity' => $item->quantity,
+                        'quantity' => $qty,
                         'image_url' => $item->menu->image_url
                     ];
                 }
