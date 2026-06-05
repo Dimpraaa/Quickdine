@@ -146,8 +146,8 @@
                     <p class="font-black text-secondary text-lg">Rp {{ number_format($order->total_price, 0, ',', '.') }}</p>
                 </div>
 
-                <button onclick="openReceipt('{{ $order->transaction_id }}')" class="bg-secondary hover:bg-[#20150F] text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors shadow-sm flex items-center gap-2 uppercase tracking-wide">
-                    <i class="fas fa-file-invoice"></i> E-Receipt
+                <button onclick="openReceiptModal({{ $order->id }})" class="bg-secondary hover:bg-[#20150F] text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors shadow-sm flex items-center gap-2 uppercase tracking-wide">
+                    <i class="fas fa-file-invoice"></i> Lihat Struk
                 </button>
             </div>
 
@@ -272,8 +272,8 @@
 
                 <!-- Modal Footer Aksi -->
                 <div class="p-4 border-t border-[#EAE3D9] bg-[#FDFBF7]">
-                    <button onclick="window.open('{{ route('order.receipt', $order->id) }}', 'CetakStruk', 'width=400,height=600')" class="w-full bg-primary hover:bg-primaryDark text-white py-3.5 rounded-xl font-bold transition-colors shadow-md flex items-center justify-center gap-2 uppercase tracking-wide text-xs">
-                        <i class="fas fa-print"></i> Cetak / Unduh PDF
+                    <button onclick="window.open('{{ route('order.receipt', $order->transaction_id) }}', 'CetakStruk', 'width=400,height=600')" class="w-full bg-primary hover:bg-primaryDark text-white py-3.5 rounded-xl font-bold transition-colors shadow-md flex items-center justify-center gap-2 uppercase tracking-wide text-xs">
+                        <i class="fas fa-file-pdf"></i> Unduh Struk (PDF)
                     </button>
                 </div>
             </div>
@@ -370,8 +370,15 @@
             }
         };
 
-        function openReceipt(transactionId) {
-            window.location.href = `/order/${transactionId}/receipt`;
+        function openReceiptModal(id) {
+            const modal = document.getElementById('receipt-modal-' + id);
+            const panel = modal.querySelector('.receipt-panel');
+            modal.classList.remove('hidden');
+            // trigger reflow
+            void modal.offsetWidth;
+            modal.classList.remove('opacity-0');
+            panel.classList.remove('scale-95');
+            panel.classList.add('scale-100');
         }
 
         function setRating(orderId, rating) {
