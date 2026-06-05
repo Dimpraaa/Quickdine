@@ -42,11 +42,19 @@ class MidtransService
         $paymentName = $fallbackName;
         if (isset($status->payment_type)) {
             if ($status->payment_type == 'bank_transfer' && isset($status->va_numbers[0])) {
-                $paymentName = strtoupper($status->va_numbers[0]->bank) . ' VA';
+                $bank = is_array($status->va_numbers[0]) ? $status->va_numbers[0]['bank'] : $status->va_numbers[0]->bank;
+                $paymentName = strtoupper($bank) . ' VA';
             } elseif ($status->payment_type == 'cstore' && isset($status->store)) {
                 $paymentName = strtoupper($status->store);
             } elseif ($status->payment_type == 'qris') {
-                $paymentName = isset($status->issuer) ? strtoupper($status->issuer) : 'QRIS';
+                $issuer = isset($status->issuer) ? strtoupper($status->issuer) : 'QRIS';
+                if ($issuer === 'AIRPAY SHOPEE') {
+                    $paymentName = 'SHOPEEPAY';
+                } elseif ($issuer === 'GOJEK') {
+                    $paymentName = 'GOPAY';
+                } else {
+                    $paymentName = $issuer;
+                }
             } elseif ($status->payment_type == 'echannel') {
                 $paymentName = 'MANDIRI VA';
             } elseif ($status->payment_type == 'gopay' || $status->payment_type == 'shopeepay') {

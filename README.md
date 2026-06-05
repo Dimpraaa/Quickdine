@@ -13,6 +13,7 @@
 - **Integrasi Midtrans:** Mendukung pembayaran digital instan (QRIS, GoPay, dll).
 - **Panggil Pelayan (Call Waiter):** Tombol darurat persisten untuk meminta bantuan staf kapan saja.
 - **Sistem Ulasan (Rating):** Pelanggan dapat memberikan masukan dan rating bintang setelah pesanan selesai.
+- **Keamanan & UX Maksimal (Anti-Double Submit & XSS Protection):** Keranjang belanja diproteksi dari bug manipulasi antarmuka dan *race-condition* demi kenyamanan transaksi.
 
 ### Kitchen Display System (KDS)
 

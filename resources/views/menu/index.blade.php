@@ -33,10 +33,25 @@
         }
     </script>
     <style>
+        /* Custom Premium Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+            margin-block: 4px; /* Memberi jarak agar tidak menabrak batas atas/bawah */
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #EAE3D9;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: #D0C8BF;
+        }
+
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
-
         .no-scrollbar {
             -ms-overflow-style: none;
             scrollbar-width: none;
@@ -142,6 +157,26 @@
             </button>
         </div>
 
+        <!-- Confirm Modal -->
+        <div id="confirm-modal" class="fixed inset-0 z-[60] hidden">
+            <div class="absolute inset-0 bg-secondary/60 backdrop-blur-sm transition-opacity opacity-0" id="confirm-backdrop" onclick="closeConfirmModal()"></div>
+            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+                <div class="relative bg-white rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:max-w-sm w-full opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" id="confirm-panel">
+                    <div class="bg-white px-6 py-6 text-center">
+                        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                            <i class="fas fa-exclamation-triangle text-2xl text-red-600"></i>
+                        </div>
+                        <h3 class="text-xl leading-6 font-black text-secondary mb-2" id="confirm-title">Hapus Item</h3>
+                        <p class="text-sm text-[#8C837C] font-medium" id="confirm-message">Apakah Anda yakin ingin menghapus item ini?</p>
+                    </div>
+                    <div class="bg-[#FDFBF7] px-6 py-4 flex gap-3">
+                        <button type="button" onclick="closeConfirmModal()" class="flex-1 bg-white border-2 border-[#EAE3D9] text-[#8C837C] font-bold rounded-xl px-4 py-3 hover:bg-[#FDFBF7] transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#EAE3D9]">Batal</button>
+                        <button type="button" id="confirm-btn" class="flex-1 bg-red-600 border-2 border-red-600 text-white font-bold rounded-xl px-4 py-3 hover:bg-red-700 hover:border-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600">Ya, Hapus</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div id="checkout-modal" class="fixed inset-0 bg-secondary/80 z-50 hidden opacity-0 transition-opacity duration-300 items-end sm:items-center justify-center backdrop-blur-sm">
             <div class="bg-white w-full max-w-md rounded-t-[2.5rem] sm:rounded-[2.5rem] p-6 h-[85vh] flex flex-col transform translate-y-full transition-transform duration-500 shadow-2xl" id="checkout-panel">
             </div>
@@ -168,6 +203,15 @@
                         currency: 'IDR',
                         maximumFractionDigits: 0
                     }).format(number || 0);
+                };
+
+                const escapeHtml = (unsafe) => {
+                    return (unsafe || '').toString()
+                        .replace(/&/g, "&amp;")
+                        .replace(/</g, "&lt;")
+                        .replace(/>/g, "&gt;")
+                        .replace(/"/g, "&quot;")
+                        .replace(/'/g, "&#039;");
                 };
 
                 document.getElementById('search-input').addEventListener('input', (e) => {
@@ -260,6 +304,45 @@
                     });
                 }
 
+                let pendingConfirmAction = null;
+
+                window.showConfirmModal = function(title, message, onConfirm) {
+                    document.getElementById('confirm-title').innerText = title;
+                    document.getElementById('confirm-message').innerText = message;
+                    pendingConfirmAction = onConfirm;
+                    
+                    const modal = document.getElementById('confirm-modal');
+                    const backdrop = document.getElementById('confirm-backdrop');
+                    const panel = document.getElementById('confirm-panel');
+                    
+                    modal.classList.remove('hidden');
+                    setTimeout(() => {
+                        backdrop.classList.remove('opacity-0');
+                        panel.classList.remove('opacity-0', 'translate-y-4', 'sm:translate-y-0', 'sm:scale-95');
+                        panel.classList.add('opacity-100', 'translate-y-0', 'sm:scale-100');
+                    }, 10);
+                };
+
+                window.closeConfirmModal = function() {
+                    const modal = document.getElementById('confirm-modal');
+                    const backdrop = document.getElementById('confirm-backdrop');
+                    const panel = document.getElementById('confirm-panel');
+                    
+                    backdrop.classList.add('opacity-0');
+                    panel.classList.remove('opacity-100', 'translate-y-0', 'sm:scale-100');
+                    panel.classList.add('opacity-0', 'translate-y-4', 'sm:translate-y-0', 'sm:scale-95');
+                    
+                    setTimeout(() => {
+                        modal.classList.add('hidden');
+                        pendingConfirmAction = null;
+                    }, 300);
+                };
+
+                document.getElementById('confirm-btn')?.addEventListener('click', () => {
+                    if (pendingConfirmAction) pendingConfirmAction();
+                    closeConfirmModal();
+                });
+
                 window.updateQty = function(id, change) {
                     const menu = menus.find(m => m.id === id);
                     if (change > 0) {
@@ -278,7 +361,24 @@
                         };
                     } else {
                         cart[id].qty += change;
-                        if (cart[id].qty <= 0) delete cart[id];
+                        if (cart[id].qty <= 0) {
+                            cart[id].qty -= change; // kembalikan ke qty sebelumnya sementara
+                            showConfirmModal(
+                                'Hapus Item',
+                                `Apakah Anda yakin ingin menghapus ${cart[id].name} dari pesanan?`,
+                                function() {
+                                    delete cart[id];
+                                    showToast('Item dihapus dari pesanan');
+                                    renderMenu();
+                                    updateCartUI();
+                                    const modal = document.getElementById('checkout-modal');
+                                    if (!modal.classList.contains('hidden')) {
+                                        openCheckoutModal();
+                                    }
+                                }
+                            );
+                            return; // Keluar tanpa update UI agar keranjang tidak berkedip
+                        }
                     }
                     renderMenu();
                     updateCartUI();
@@ -308,49 +408,32 @@
 
                 window.selectPayment = function(method) {
                     selectedPayment = method;
-                    const qris = document.getElementById('method-qris');
-                    const cash = document.getElementById('method-cash');
-                    const iconQris = document.getElementById('icon-qris');
-                    const iconCash = document.getElementById('icon-cash');
-
-                    // Menggunakan padding yang lebih kecil (py-2 px-3) dan rounded-xl
-                    if (method === 'qris') {
-                        qris.className = 'border-2 border-primary bg-[#FDFBF7] rounded-xl py-2 px-3 flex items-center justify-center gap-2 cursor-pointer transition-all shadow-sm';
-                        cash.className = 'border-2 border-[#EAE3D9] bg-white hover:bg-[#FDFBF7] rounded-xl py-2 px-3 flex items-center justify-center gap-2 cursor-pointer transition-all';
-                        iconQris.className = 'fas fa-qrcode text-primary text-base';
-                        iconCash.className = 'fas fa-money-bill-wave text-[#D0C8BF] text-base';
-                    } else {
-                        cash.className = 'border-2 border-primary bg-[#FDFBF7] rounded-xl py-2 px-3 flex items-center justify-center gap-2 cursor-pointer transition-all shadow-sm';
-                        qris.className = 'border-2 border-[#EAE3D9] bg-white hover:bg-[#FDFBF7] rounded-xl py-2 px-3 flex items-center justify-center gap-2 cursor-pointer transition-all';
-                        iconCash.className = 'fas fa-money-bill-wave text-primary text-base';
-                        iconQris.className = 'fas fa-qrcode text-[#D0C8BF] text-base';
-                    }
+                    openCheckoutModal();
                 };
 
                 window.selectOrderType = function(type) {
                     selectedOrderType = type;
-                    const dineIn = document.getElementById('type-dine_in');
-                    const takeAway = document.getElementById('type-take_away');
-                    const iconDineIn = document.getElementById('icon-dine_in');
-                    const iconTakeAway = document.getElementById('icon-take_away');
-
-                    if (type === 'dine_in') {
-                        dineIn.className = 'border-2 border-primary bg-[#FDFBF7] rounded-xl py-2 px-3 flex items-center justify-center gap-2 cursor-pointer transition-all shadow-sm';
-                        takeAway.className = 'border-2 border-[#EAE3D9] bg-white hover:bg-[#FDFBF7] rounded-xl py-2 px-3 flex items-center justify-center gap-2 cursor-pointer transition-all';
-                        iconDineIn.className = 'fas fa-utensils text-primary text-base';
-                        iconTakeAway.className = 'fas fa-shopping-bag text-[#D0C8BF] text-base';
-                    } else {
-                        takeAway.className = 'border-2 border-primary bg-[#FDFBF7] rounded-xl py-2 px-3 flex items-center justify-center gap-2 cursor-pointer transition-all shadow-sm';
-                        dineIn.className = 'border-2 border-[#EAE3D9] bg-white hover:bg-[#FDFBF7] rounded-xl py-2 px-3 flex items-center justify-center gap-2 cursor-pointer transition-all';
-                        iconTakeAway.className = 'fas fa-shopping-bag text-primary text-base';
-                        iconDineIn.className = 'fas fa-utensils text-[#D0C8BF] text-base';
-                    }
+                    openCheckoutModal();
                 };
 
                 window.openCheckoutModal = function() {
                     if (qrisTimeout) clearTimeout(qrisTimeout);
                     const modal = document.getElementById('checkout-modal');
                     const panel = document.getElementById('checkout-panel');
+                    
+                    // Simpan posisi scroll sebelum di-render ulang
+                    let currentScroll = 0;
+                    const scrollContainer = document.getElementById('checkout-scroll-container');
+                    if (scrollContainer) {
+                        currentScroll = scrollContainer.scrollTop;
+                    }
+                    
+                    // Simpan elemen input yang sedang fokus agar keyboard tidak tertutup
+                    let focusedId = null;
+                    if (document.activeElement && document.activeElement.tagName === 'INPUT') {
+                        focusedId = document.activeElement.id;
+                    }
+                    
                     modal.classList.remove('hidden');
                     setTimeout(() => {
                         modal.classList.add('opacity-100', 'flex');
@@ -363,86 +446,113 @@
                         const item = cart[id];
                         subtotal += item.price * item.qty;
                         itemsHtml += `
-                            <div class="pb-4 border-b border-[#EAE3D9] last:border-0 relative">
-                                <div class="flex justify-between items-start mb-2">
-                                    <div class="flex gap-3 items-start">
-                                        <div class="bg-[#FDFBF7] border border-[#EAE3D9] w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs text-secondary shrink-0">${item.qty}x</div>
-                                        <div>
-                                            <h4 class="font-bold text-secondary text-sm leading-tight">${item.name}</h4>
-                                            <span class="text-xs text-primary font-bold mt-0.5 inline-block">${formatRp(item.price)}</span>
+                            <div class="bg-white p-4 rounded-2xl shadow-sm border border-[#EAE3D9] mb-3 relative group">
+                                <div class="flex gap-4 items-center">
+                                    <img src="${escapeHtml(item.image_url) || 'https://via.placeholder.com/100'}" alt="${escapeHtml(item.name)}" onerror="this.src='https://via.placeholder.com/100?text=Menu'" class="w-16 h-16 object-cover rounded-xl shadow-sm border border-[#F3EFE9]">
+                                    <div class="flex-1">
+                                        <h4 class="font-bold text-secondary text-sm leading-tight mb-1 pr-6 line-clamp-2">${escapeHtml(item.name)}</h4>
+                                        <span class="text-xs text-primary font-bold inline-block">${formatRp(item.price)}</span>
+                                    </div>
+                                    <div class="flex flex-col items-end gap-2 shrink-0">
+                                        <span class="font-black text-secondary text-sm">${formatRp(item.price * item.qty)}</span>
+                                        <div class="flex items-center gap-2 bg-[#FDFBF7] rounded-lg p-1 border border-[#EAE3D9] shadow-sm">
+                                            <button onclick="updateQty(${item.id}, -1); openCheckoutModal();" class="w-6 h-6 flex justify-center items-center bg-white text-secondary hover:text-primary rounded-md shadow-sm active:scale-90 transition-all border border-[#F3EFE9]"><i class="fas fa-minus text-[9px]"></i></button>
+                                            <span class="font-bold text-xs w-4 text-center text-secondary">${item.qty}</span>
+                                            <button onclick="updateQty(${item.id}, 1); openCheckoutModal();" class="w-6 h-6 flex justify-center items-center bg-primary text-white rounded-md shadow-sm active:scale-90 transition-all"><i class="fas fa-plus text-[9px]"></i></button>
                                         </div>
                                     </div>
-                                    <span class="font-black text-secondary text-sm shrink-0 ml-2">${formatRp(item.price * item.qty)}</span>
                                 </div>
-                                <div class="pl-10 pr-1">
-                                    <div class="relative">
-                                        <i class="fas fa-pen absolute left-3 top-1/2 transform -translate-y-1/2 text-[#D0C8BF] text-[10px]"></i>
-                                        <input type="text" placeholder="Catatan opsional..." 
-                                            class="w-full text-[11px] bg-[#FCF9F2] text-secondary border border-[#EAE3D9] rounded-lg pl-8 pr-3 py-2 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary focus:bg-white transition-colors"
-                                            value="${item.notes || ''}"
-                                            onchange="updateNote(${item.id}, this.value)">
-                                    </div>
+                                <div class="mt-3 relative">
+                                    <i class="fas fa-pen absolute left-3 top-1/2 transform -translate-y-1/2 text-[#D0C8BF] text-[10px]"></i>
+                                    <input type="text" placeholder="Tambahkan catatan opsional..." class="w-full text-xs bg-[#FDFBF7] border border-[#EAE3D9] rounded-xl px-3 pl-8 py-2.5 focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/50 transition-all font-medium text-secondary placeholder-[#A69C94]" id="note-${item.id}" value="${escapeHtml(item.notes || '')}" oninput="updateNote(${item.id}, this.value)">
                                 </div>
-                            </div>`;
+                            </div>
+`;
                     }
 
                     const tax = subtotal * 0.10;
                     const grandTotal = subtotal + tax;
 
                     panel.innerHTML = `
-                        <div class="flex justify-between items-center mb-4 pb-3 border-b border-[#EAE3D9]">
-                            <div>
+                        <div class="flex justify-between items-center mb-4 pb-3 border-b border-[#EAE3D9] px-2 pt-2">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+                                    <i class="fas fa-shopping-bag"></i>
+                                </div>
                                 <h2 class="text-xl font-black text-secondary tracking-tight">Rincian Pesanan</h2>
                             </div>
-                            <button onclick="closeCheckoutModal()" class="text-[#A69C94] w-8 h-8 bg-[#FDFBF7] border border-[#EAE3D9] rounded-full flex items-center justify-center hover:bg-[#EAE3D9] hover:text-secondary transition-colors"><i class="fas fa-times text-sm"></i></button>
+                            <button onclick="closeCheckoutModal()" class="text-[#A69C94] w-8 h-8 bg-[#FDFBF7] border border-[#EAE3D9] rounded-full flex items-center justify-center hover:bg-[#EAE3D9] hover:text-secondary transition-colors shadow-sm"><i class="fas fa-times text-sm"></i></button>
                         </div>
                         
-                        <div class="flex-1 overflow-y-auto space-y-4 no-scrollbar pr-2 mb-2">
+                        <div id="checkout-scroll-container" class="flex-1 overflow-y-auto space-y-1 custom-scrollbar pr-2 pl-1 pb-1 mb-2">
                             ${itemsHtml}
                         </div>
                         
-                        <div class="mt-2 pt-3 border-t border-[#EAE3D9]">
-                            <div class="mb-2.5">
-                                <h3 class="text-[9px] font-black text-[#A69C94] mb-1.5 uppercase tracking-widest">Tipe Pesanan</h3>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <div id="type-dine_in" onclick="selectOrderType('dine_in')" class="border-2 ${selectedOrderType === 'dine_in' ? 'border-primary bg-[#FDFBF7]' : 'border-[#EAE3D9] bg-white hover:bg-[#FDFBF7]'} rounded-xl py-2 px-3 flex items-center justify-center gap-2 cursor-pointer transition-all shadow-sm">
-                                        <i id="icon-dine_in" class="fas fa-utensils ${selectedOrderType === 'dine_in' ? 'text-primary' : 'text-[#D0C8BF]'} text-base"></i>
-                                        <span class="font-bold text-xs text-secondary">Dine In</span>
-                                    </div>
-                                    <div id="type-take_away" onclick="selectOrderType('take_away')" class="border-2 ${selectedOrderType === 'take_away' ? 'border-primary bg-[#FDFBF7]' : 'border-[#EAE3D9] bg-white hover:bg-[#FDFBF7]'} rounded-xl py-2 px-3 flex items-center justify-center gap-2 cursor-pointer transition-all shadow-sm">
-                                        <i id="icon-take_away" class="fas fa-shopping-bag ${selectedOrderType === 'take_away' ? 'text-primary' : 'text-[#D0C8BF]'} text-base"></i>
-                                        <span class="font-bold text-xs text-secondary">Take Away</span>
+                        <div class="mt-2 pt-4 border-t border-[#EAE3D9] px-1">
+                            <!-- Options Container -->
+                            <div class="flex gap-4 mb-4">
+                                <!-- Order Type -->
+                                <div class="flex-1">
+                                    <h3 class="text-[10px] font-black text-[#A69C94] mb-2 uppercase tracking-widest flex items-center gap-1.5"><i class="fas fa-utensils"></i> Tipe Pesanan</h3>
+                                    <div class="flex flex-col gap-2">
+                                        <div id="type-dine_in" onclick="selectOrderType('dine_in')" class="border-2 ${selectedOrderType === 'dine_in' ? 'border-primary bg-[#FDFBF7]' : 'border-[#EAE3D9] bg-white hover:bg-[#FDFBF7]'} rounded-xl py-2.5 px-3 flex items-center gap-3 cursor-pointer transition-all shadow-sm">
+                                            <div class="w-6 h-6 rounded-full ${selectedOrderType === 'dine_in' ? 'bg-primary text-white' : 'bg-[#EAE3D9] text-white'} flex items-center justify-center text-[10px] transition-colors"><i class="fas fa-check"></i></div>
+                                            <span class="font-bold text-xs text-secondary">Dine In</span>
+                                        </div>
+                                        <div id="type-take_away" onclick="selectOrderType('take_away')" class="border-2 ${selectedOrderType === 'take_away' ? 'border-primary bg-[#FDFBF7]' : 'border-[#EAE3D9] bg-white hover:bg-[#FDFBF7]'} rounded-xl py-2.5 px-3 flex items-center gap-3 cursor-pointer transition-all shadow-sm">
+                                            <div class="w-6 h-6 rounded-full ${selectedOrderType === 'take_away' ? 'bg-primary text-white' : 'bg-[#EAE3D9] text-white'} flex items-center justify-center text-[10px] transition-colors"><i class="fas fa-check"></i></div>
+                                            <span class="font-bold text-xs text-secondary">Take Away</span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div class="mb-3">
-                                <h3 class="text-[9px] font-black text-[#A69C94] mb-1.5 uppercase tracking-widest">Metode Pembayaran</h3>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <div id="method-qris" onclick="selectPayment('qris')" class="border-2 ${selectedPayment === 'qris' ? 'border-primary bg-[#FDFBF7]' : 'border-[#EAE3D9] bg-white'} rounded-xl py-2 px-3 flex items-center justify-center gap-2 cursor-pointer transition-all shadow-sm">
-                                        <i id="icon-qris" class="fas fa-qrcode ${selectedPayment === 'qris' ? 'text-primary' : 'text-[#D0C8BF]'} text-base"></i>
-                                        <span class="font-bold text-[10px] text-secondary text-center leading-tight">Transfer Bank<br>/ QRIS</span>
-                                    </div>
-                                    <div id="method-cash" onclick="selectPayment('cash')" class="border-2 ${selectedPayment === 'cash' ? 'border-primary bg-[#FDFBF7]' : 'border-[#EAE3D9] bg-white'} rounded-xl py-2 px-3 flex items-center justify-center gap-2 cursor-pointer transition-all shadow-sm">
-                                        <i id="icon-cash" class="fas fa-money-bill-wave ${selectedPayment === 'cash' ? 'text-primary' : 'text-[#D0C8BF]'} text-base"></i>
-                                        <span class="font-bold text-xs text-secondary">Tunai</span>
+                                <!-- Payment Method -->
+                                <div class="flex-1">
+                                    <h3 class="text-[10px] font-black text-[#A69C94] mb-2 uppercase tracking-widest flex items-center gap-1.5"><i class="fas fa-wallet"></i> Pembayaran</h3>
+                                    <div class="flex flex-col gap-2">
+                                        <div id="method-qris" onclick="selectPayment('qris')" class="border-2 ${selectedPayment === 'qris' ? 'border-primary bg-[#FDFBF7]' : 'border-[#EAE3D9] bg-white'} rounded-xl py-2.5 px-3 flex items-center gap-3 cursor-pointer transition-all shadow-sm">
+                                            <div class="w-6 h-6 rounded-full ${selectedPayment === 'qris' ? 'bg-primary text-white' : 'bg-[#EAE3D9] text-white'} flex items-center justify-center text-[10px] transition-colors"><i class="fas fa-qrcode"></i></div>
+                                            <span class="font-bold text-[11px] text-secondary leading-tight">Transfer / QRIS</span>
+                                        </div>
+                                        <div id="method-cash" onclick="selectPayment('cash')" class="border-2 ${selectedPayment === 'cash' ? 'border-primary bg-[#FDFBF7]' : 'border-[#EAE3D9] bg-white'} rounded-xl py-2.5 px-3 flex items-center gap-3 cursor-pointer transition-all shadow-sm">
+                                            <div class="w-6 h-6 rounded-full ${selectedPayment === 'cash' ? 'bg-primary text-white' : 'bg-[#EAE3D9] text-white'} flex items-center justify-center text-[10px] transition-colors"><i class="fas fa-money-bill-wave"></i></div>
+                                            <span class="font-bold text-[11px] text-secondary">Tunai</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             
-                            <div class="bg-[#FCF9F2] p-3 rounded-xl border border-[#EAE3D9] mb-3">
-                                <div class="flex justify-between mb-1 text-[11px] font-semibold"><span class="text-[#8C837C]">Subtotal</span><span class="text-secondary">${formatRp(subtotal)}</span></div>
-                                <div class="flex justify-between mb-2 text-[11px] font-semibold"><span class="text-[#8C837C]">Pajak (10%)</span><span class="text-secondary">${formatRp(tax)}</span></div>
-                                <div class="flex justify-between pt-2 border-t border-dashed border-[#D0C8BF] items-center">
-                                    <span class="font-black text-secondary text-xs">TOTAL</span>
-                                    <span class="font-black text-primary text-base">${formatRp(grandTotal)}</span>
+                            <!-- Summary -->
+                            <div class="bg-white p-4 rounded-2xl border border-[#EAE3D9] shadow-sm mb-4">
+                                <div class="flex justify-between mb-2 text-xs font-semibold"><span class="text-[#8C837C]">Subtotal</span><span class="text-secondary">${formatRp(subtotal)}</span></div>
+                                <div class="flex justify-between mb-3 text-xs font-semibold"><span class="text-[#8C837C]">Pajak (10%)</span><span class="text-secondary">${formatRp(tax)}</span></div>
+                                <div class="flex justify-between pt-3 border-t border-dashed border-[#D0C8BF] items-center">
+                                    <span class="font-black text-secondary text-sm">TOTAL PEMBAYARAN</span>
+                                    <span class="font-black text-primary text-lg">${formatRp(grandTotal)}</span>
                                 </div>
                             </div>
 
-                            <button id="btn-checkout" onclick="processCheckout()" class="w-full bg-secondary hover:bg-[#20150F] text-white font-bold py-3 rounded-xl flex justify-center items-center gap-2 transition-colors shadow-xl active:scale-95 uppercase tracking-wide text-xs disabled:opacity-50 disabled:cursor-not-allowed">
-                                <i id="btn-checkout-icon" class="fas fa-check-circle text-primary text-sm"></i> <span id="btn-checkout-text">Bayar & Proses Pesanan</span>
+                            <button id="btn-checkout" onclick="processCheckout()" ${isProcessingCheckout ? 'disabled' : ''} class="w-full bg-secondary hover:bg-[#20150F] text-white font-bold py-4 rounded-2xl flex justify-center items-center gap-2 transition-all shadow-xl shadow-secondary/20 active:scale-95 uppercase tracking-wider text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                                <i id="btn-checkout-icon" class="${isProcessingCheckout ? 'fas fa-circle-notch fa-spin text-white' : 'fas fa-check-circle text-primary text-sm'}"></i> <span id="btn-checkout-text">${isProcessingCheckout ? 'Memproses...' : 'Bayar Sekarang'}</span>
                             </button>
                         </div>`;
+                        
+                    const newScrollContainer = document.getElementById('checkout-scroll-container');
+                    if (newScrollContainer) {
+                        newScrollContainer.scrollTop = currentScroll;
+                    }
+                    
+                    // Kembalikan fokus ke input yang sedang diketik (jika ada)
+                    if (focusedId) {
+                        const el = document.getElementById(focusedId);
+                        if (el) {
+                            el.focus();
+                            // Pindahkan kursor ke akhir teks
+                            const val = el.value;
+                            el.value = '';
+                            el.value = val;
+                        }
+                    }
                 };
 
                 window.closeCheckoutModal = function() {
@@ -549,7 +659,12 @@
                     }
                 };
 
+                let isProcessingCheckout = false;
+
                 window.submitOrder = async function(method) {
+                    if (isProcessingCheckout) return;
+                    isProcessingCheckout = true;
+
                     const btn = document.getElementById('btn-checkout');
                     if (btn) {
                         btn.disabled = true;
@@ -634,13 +749,44 @@
                 };
 
                 function resetCheckoutBtn() {
+                    isProcessingCheckout = false;
                     const btn = document.getElementById('btn-checkout');
-                    btn.disabled = false;
-                    document.getElementById('btn-checkout-icon').className = 'fas fa-check-circle text-primary text-sm';
-                    document.getElementById('btn-checkout-text').innerText = 'Bayar & Proses Pesanan';
+                    if (btn) {
+                        btn.disabled = false;
+                        document.getElementById('btn-checkout-icon').className = 'fas fa-check-circle text-primary text-sm';
+                        document.getElementById('btn-checkout-text').innerText = 'Bayar Sekarang';
+                    }
                 }
 
                 renderMenu();
+                
+                // Tampilkan pesan sukses dari session jika ada
+                @if(session('success'))
+                    setTimeout(() => showToast('{{ session("success") }}', 'success'), 500);
+                @endif
+                
+                // Tampilkan pesan error dari session jika ada
+                @if(session('error'))
+                    setTimeout(() => showToast('{{ session("error") }}', 'error'), 500);
+                @endif
+                
+                // Cek apakah ada session restore_cart (Fitur Ubah Metode Pembayaran)
+                let restoreCartData = @json(session('restore_cart', []));
+                if (restoreCartData && restoreCartData.length > 0) {
+                    restoreCartData.forEach(item => {
+                        cart[item.id] = {
+                            id: item.id,
+                            name: item.name,
+                            price: parseFloat(item.price),
+                            qty: item.quantity,
+                            notes: ''
+                        };
+                    });
+                    updateCartUI();
+                    // Buka modal otomatis
+                    document.getElementById('cart-overlay').classList.remove('hidden');
+                    document.getElementById('cart-modal').classList.remove('translate-y-full');
+                }
             } catch (e) {
                 console.error(e);
             }

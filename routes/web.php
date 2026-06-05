@@ -43,6 +43,7 @@ Route::get('/history/{table_number}', [OrderController::class, 'history'])->name
 Route::get('/order/{transaction_id}/receipt', [OrderController::class, 'receipt'])->name('order.receipt');
 Route::post('/order/{transaction_id}/review', [OrderController::class, 'submitReview'])->name('order.review');
 Route::post('/order/auto-cancel', [OrderController::class, 'autoCancel'])->name('order.autoCancel');
+Route::post('/order/{transaction_id}/cancel-and-reorder', [OrderController::class, 'cancelAndReorder'])->name('order.cancelAndReorder');
 Route::post('/payment/verify', [OrderController::class, 'verifyPayment'])->name('payment.verify');
 Route::post('/call-waiter', [MenuController::class, 'callWaiter'])->name('call.waiter');
 

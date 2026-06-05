@@ -307,4 +307,51 @@ class OrderController extends Controller
             ], 500);
         }
     }
+    public function cancelAndReorder(Request $request, $transaction_id)
+    {
+        try {
+            DB::beginTransaction();
+            
+            $order = Order::lockForUpdate()->with('items.menu')->where('transaction_id', $transaction_id)->firstOrFail();
+            
+            if ($order->status !== 'pending' || $order->payment_status !== 'unpaid') {
+                DB::rollBack();
+                return redirect()->back()->with('error', 'Pesanan tidak dapat dibatalkan.');
+            }
+            
+            // Reconstruct the cart array
+            $restoreCart = [];
+            foreach ($order->items as $item) {
+                // Restore stock
+                if ($item->menu) {
+                    $item->menu->increment('stock', $item->quantity);
+                    
+                    $restoreCart[] = [
+                        'id' => $item->menu_id,
+                        'name' => $item->menu->name,
+                        'price' => $item->menu->price,
+                        'quantity' => $item->quantity,
+                        'image' => $item->menu->image
+                    ];
+                }
+            }
+            
+            $order->update(['status' => 'cancelled']);
+            
+            DB::commit();
+            broadcast(new \App\Events\KitchenUpdated());
+            
+            // Set session restore_cart
+            session(['restore_cart' => $restoreCart]);
+            
+            $tableNum = session('current_table', $order->table ? $order->table->table_number : '0');
+            if (empty($tableNum)) $tableNum = '0';
+            
+            return redirect()->route('menu.index', $tableNum)->with('success', 'Pesanan dibatalkan. Silakan pilih pembayaran baru.');
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal membatalkan pesanan.');
+        }
+    }
 }

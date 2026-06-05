@@ -120,6 +120,27 @@
                 <div class="bg-[#FDFBF7] border border-[#EAE3D9] rounded-xl p-4 mt-4 text-left">
                     <p class="text-sm text-[#8C837C]">Anda telah memilih metode pembayaran Virtual Account/E-Wallet. Pesanan Anda akan otomatis diproses setelah transfer/pembayaran berhasil dilakukan.</p>
                 </div>
+                <form id="cancel-reorder-form" action="{{ route('order.cancelAndReorder', $order->transaction_id) }}" method="POST" class="mt-4">
+                    @csrf
+                    <button type="button" onclick="document.getElementById('cancel-modal').classList.remove('hidden')" class="w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold py-3 rounded-xl transition-colors text-xs uppercase tracking-wide">
+                        <i class="fas fa-undo mr-1"></i> Batalkan & Ubah Pembayaran
+                    </button>
+                </form>
+
+                <!-- Custom Confirm Modal -->
+                <div id="cancel-modal" class="hidden fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity">
+                    <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl transform transition-all text-center border border-[#EAE3D9]">
+                        <div class="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-red-50">
+                            <i class="fas fa-exclamation-triangle text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-black text-secondary mb-2">Ubah Pembayaran?</h3>
+                        <p class="text-sm text-[#8C837C] mb-6">Pesanan ini akan dibatalkan, namun isi keranjang Anda akan dipulihkan agar bisa melakukan pembayaran ulang.</p>
+                        <div class="flex gap-3">
+                            <button onclick="document.getElementById('cancel-modal').classList.add('hidden')" class="flex-1 bg-[#FDFBF7] hover:bg-[#EAE3D9] text-secondary font-bold py-3 rounded-xl border border-[#EAE3D9] transition-colors text-xs uppercase tracking-wide">Tutup</button>
+                            <button onclick="document.getElementById('cancel-reorder-form').submit()" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-red-500/30 transition-colors text-xs uppercase tracking-wide">Ya, Batalkan</button>
+                        </div>
+                    </div>
+                </div>
             @endif
         </div>
         @else
@@ -168,7 +189,7 @@
                     {{ $order->order_type == 'take_away' ? 'Pesanan Siap Diambil!' : 'Pesanan Segera Diantar!' }}
                 </h2>
                 <p class="text-sm text-[#8C837C]">
-                    {{ $order->order_type == 'take_away' ? 'Pesanan kamu udah siap diambil nih, semoga jadi mood booster hari ini!' : 'Pesanan kamu lagi OTW ke meja kamu nih, traktir kami bintang 5 yaa :D' }}
+                    {{ $order->order_type == 'take_away' ? 'Pesanan kamu udah siap diambil nih, semoga jadi mood booster hari ini!' : 'Pesanan kamu lagi OTW ke meja kamu nih, enjoy!' }}
                 </p>
             </div>
             @endif
