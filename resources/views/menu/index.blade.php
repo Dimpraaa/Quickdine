@@ -782,8 +782,7 @@
                     });
                     updateCartUI();
                     // Buka modal otomatis
-                    document.getElementById('cart-overlay').classList.remove('hidden');
-                    document.getElementById('cart-modal').classList.remove('translate-y-full');
+                    openCheckoutModal();
                 }
                 
                 renderMenu();
