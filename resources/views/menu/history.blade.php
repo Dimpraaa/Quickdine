@@ -196,9 +196,9 @@
                 </div>
 
                 <!-- Area Scroll Struk -->
-                <div class="p-6 overflow-y-auto bg-gray-200 flex justify-center no-scrollbar">
+                <div class="p-6 overflow-y-auto bg-gray-200 no-scrollbar">
 
-                    <div id="receipt-area-{{ $order->id }}" class="receipt-content bg-white p-5 shadow-sm w-[80mm] text-black font-sans relative border border-gray-300">
+                    <div id="receipt-area-{{ $order->id }}" class="receipt-content bg-white p-5 pb-8 shadow-sm w-[80mm] mx-auto text-black font-sans relative border border-gray-300">
                         <div class="absolute top-0 left-0 w-full h-1 bg-gray-800"></div>
 
                         <div class="text-center mb-4 mt-2">
