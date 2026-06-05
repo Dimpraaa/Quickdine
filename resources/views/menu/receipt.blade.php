@@ -7,19 +7,16 @@
     <style>
         body {
             font-family: 'Courier New', Courier, monospace;
-            background-color: #f0f0f0;
             margin: 0;
-            padding: 20px;
+            padding: 10px;
             text-align: center;
+            color: #000;
         }
 
         .receipt {
-            background-color: #fff;
             width: 100%;
             max-width: 300px;
             margin: 0 auto;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             text-align: left;
         }
 
@@ -41,21 +38,11 @@
 
         td {
             vertical-align: top;
+            word-wrap: break-word;
         }
 
-        @media print {
-            body {
-                background-color: transparent;
-                padding: 0;
-            }
-            .receipt {
-                max-width: 100%;
-                box-shadow: none;
-                padding: 0;
-            }
-            @page {
-                margin: 0;
-            }
+        @page {
+            margin: 0;
         }
     </style>
 </head>
