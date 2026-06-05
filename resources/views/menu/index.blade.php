@@ -758,8 +758,6 @@
                     }
                 }
 
-                renderMenu();
-                
                 // Tampilkan pesan sukses dari session jika ada
                 @if(session('success'))
                     setTimeout(() => showToast('{{ session("success") }}', 'success'), 500);
@@ -787,6 +785,8 @@
                     document.getElementById('cart-overlay').classList.remove('hidden');
                     document.getElementById('cart-modal').classList.remove('translate-y-full');
                 }
+                
+                renderMenu();
             } catch (e) {
                 console.error(e);
             }
