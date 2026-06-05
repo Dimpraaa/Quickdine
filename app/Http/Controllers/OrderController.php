@@ -377,8 +377,8 @@ class OrderController extends Controller
             // Siapkan keranjang dengan item dari pesanan lama
             $restoreCart = [];
             foreach ($order->items as $item) {
-                // Hanya tambahkan jika menu masih aktif dan stok tersedia
-                if ($item->menu && $item->menu->is_active && $item->menu->stock > 0) {
+                // Hanya tambahkan jika menu masih ada dan stok tersedia
+                if ($item->menu && $item->menu->stock > 0) {
                     // Gunakan harga saat ini (price), bukan price_at_order, agar sinkron dengan menu saat ini
                     $restoreCart[] = [
                         'id' => $item->menu_id,

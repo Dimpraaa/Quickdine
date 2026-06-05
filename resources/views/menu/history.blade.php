@@ -455,6 +455,16 @@
             }
         }
 
+        // Tampilkan pesan sukses dari session jika ada
+        @if(session('success'))
+            setTimeout(() => showToast('{{ session("success") }}', 'success'), 500);
+        @endif
+        
+        // Tampilkan pesan error dari session jika ada
+        @if(session('error'))
+            setTimeout(() => showToast('{{ session("error") }}', 'error'), 500);
+        @endif
+
         function hoverRating(orderId, rating) {
             const stars = document.querySelectorAll('.star-btn-' + orderId);
             stars.forEach((star, index) => {
