@@ -158,7 +158,7 @@
         </div>
 
         <!-- Confirm Modal -->
-        <div id="confirm-modal" class="fixed inset-0 z-[60] hidden">
+        <div id="confirm-modal" class="fixed inset-0 hidden" style="z-index: 60;">
             <div class="absolute inset-0 bg-secondary/60 backdrop-blur-sm transition-opacity opacity-0" id="confirm-backdrop" onclick="closeConfirmModal()"></div>
             <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
                 <div class="relative bg-white rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:max-w-sm w-full opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" id="confirm-panel">
@@ -465,9 +465,9 @@
                                     <div class="flex flex-col items-end gap-2 shrink-0">
                                         <span class="font-black text-secondary text-sm">${formatRp(item.price * item.qty)}</span>
                                         <div class="flex items-center gap-2 bg-[#FDFBF7] rounded-lg p-1 border border-[#EAE3D9] shadow-sm">
-                                            <button onclick="updateQty(${item.id}, -1); openCheckoutModal();" class="w-6 h-6 flex justify-center items-center bg-white text-secondary hover:text-primary rounded-md shadow-sm active:scale-90 transition-all border border-[#F3EFE9]"><i class="fas fa-minus text-[9px]"></i></button>
+                                            <button onclick="updateQty(${item.id}, -1, true)" class="w-6 h-6 flex justify-center items-center bg-white text-secondary hover:text-primary rounded-md shadow-sm active:scale-90 transition-all border border-[#F3EFE9]"><i class="fas fa-minus text-[9px]"></i></button>
                                             <span class="font-bold text-xs w-4 text-center text-secondary">${item.qty}</span>
-                                            <button onclick="updateQty(${item.id}, 1); openCheckoutModal();" class="w-6 h-6 flex justify-center items-center bg-primary text-white rounded-md shadow-sm active:scale-90 transition-all"><i class="fas fa-plus text-[9px]"></i></button>
+                                            <button onclick="updateQty(${item.id}, 1, true)" class="w-6 h-6 flex justify-center items-center bg-primary text-white rounded-md shadow-sm active:scale-90 transition-all"><i class="fas fa-plus text-[9px]"></i></button>
                                         </div>
                                     </div>
                                 </div>
