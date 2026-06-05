@@ -135,9 +135,20 @@
 
         <div class="divider" style="margin-top: 16px;"></div>
 
+        <div class="text-center" style="margin-top: 10px; margin-bottom: 10px;">
+            <p class="font-bold text-sm" style="margin:4px 0;">AKSES WIFI</p>
+            <table style="width: 100%; text-align: center; margin-top: 4px;">
+                <tr><td class="text-xs">SSID: <span class="font-bold">QuickDine_Guest</span></td></tr>
+                <tr><td class="text-xs">Pass: <span class="font-bold">makanenak123</span></td></tr>
+            </table>
+        </div>
+
+        <div class="divider"></div>
+
         <div class="text-center" style="margin-top: 16px;">
             <p class="font-bold text-sm" style="margin:4px 0;">Terima Kasih</p>
             <p class="text-xs" style="margin:4px 0;">Silakan datang kembali</p>
+            <p class="text-xs" style="margin:4px 0; margin-top: 8px;">IG: @quickdine.id</p>
         </div>
     </div>
 

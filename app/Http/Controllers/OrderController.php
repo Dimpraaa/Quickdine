@@ -251,8 +251,13 @@ class OrderController extends Controller
     {
         $order = Order::with(['items.menu', 'table'])->where('transaction_id', $transaction_id)->firstOrFail();
         
+        // Kalkulasi tinggi kertas dinamis berdasarkan jumlah item
+        $baseHeight = 380; // Tinggi dasar (termasuk header, footer, dan info WiFi)
+        $itemHeight = 25;  // Perkiraan tinggi per baris item
+        $paperHeight = $baseHeight + ($order->items->count() * $itemHeight);
+
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('menu.receipt', compact('order'))
-                    ->setPaper([0, 0, 226.77, 800], 'portrait');
+                    ->setPaper([0, 0, 226.77, $paperHeight], 'portrait');
                     
         return $pdf->download('Struk_QuickDine_' . $transaction_id . '.pdf');
     }
