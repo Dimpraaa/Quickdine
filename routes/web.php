@@ -41,6 +41,7 @@ Route::post('/checkout', [OrderController::class, 'store'])->name('checkout.stor
 Route::get('/order-success/{transaction_id}', [OrderController::class, 'success'])->name('order.success');
 Route::get('/history/{table_number}', [OrderController::class, 'history'])->name('order.history');
 Route::get('/order/{transaction_id}/receipt', [OrderController::class, 'receipt'])->name('order.receipt');
+Route::get('/order/{transaction_id}/receipt/pdf', [OrderController::class, 'downloadReceiptPdf'])->name('order.receipt.pdf');
 Route::post('/order/{transaction_id}/review', [OrderController::class, 'submitReview'])->name('order.review');
 Route::post('/order/auto-cancel', [OrderController::class, 'autoCancel'])->name('order.autoCancel');
 Route::post('/order/{transaction_id}/cancel-and-reorder', [OrderController::class, 'cancelAndReorder'])->name('order.cancelAndReorder');

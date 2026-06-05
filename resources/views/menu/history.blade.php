@@ -272,9 +272,9 @@
 
                 <!-- Modal Footer Aksi -->
                 <div class="p-4 border-t border-[#EAE3D9] bg-[#FDFBF7]">
-                    <button onclick="window.open('{{ route('order.receipt', $order->transaction_id) }}', 'CetakStruk', 'width=400,height=600')" class="w-full bg-primary hover:bg-primaryDark text-white py-3.5 rounded-xl font-bold transition-colors shadow-md flex items-center justify-center gap-2 uppercase tracking-wide text-xs">
+                    <a href="{{ route('order.receipt.pdf', $order->transaction_id) }}" class="w-full bg-primary hover:bg-primaryDark text-white py-3.5 rounded-xl font-bold transition-colors shadow-md flex items-center justify-center gap-2 uppercase tracking-wide text-xs text-center">
                         <i class="fas fa-file-pdf"></i> Unduh Struk (PDF)
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>

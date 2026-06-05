@@ -247,6 +247,16 @@ class OrderController extends Controller
         return view('menu.receipt', compact('order'));
     }
 
+    public function downloadReceiptPdf($transaction_id)
+    {
+        $order = Order::with(['items.menu', 'table'])->where('transaction_id', $transaction_id)->firstOrFail();
+        
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('menu.receipt', compact('order'))
+                    ->setPaper([0, 0, 226.77, 800], 'portrait');
+                    
+        return $pdf->download('Struk_QuickDine_' . $transaction_id . '.pdf');
+    }
+
     public function submitReview(Request $request, $transaction_id)
     {
         $request->validate([
