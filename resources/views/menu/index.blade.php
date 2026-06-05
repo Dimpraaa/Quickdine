@@ -777,6 +777,7 @@
                             name: item.name,
                             price: parseFloat(item.price),
                             qty: item.quantity,
+                            image_url: item.image_url,
                             notes: ''
                         };
                     });
