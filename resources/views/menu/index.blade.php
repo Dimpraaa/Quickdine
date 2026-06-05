@@ -411,7 +411,6 @@
                         cartBar.classList.remove('translate-y-full');
                     } else {
                         cartBar.classList.add('translate-y-full');
-                        closeCheckoutModal();
                     }
                 }
 
@@ -451,7 +450,9 @@
 
                     let subtotal = 0;
                     let itemsHtml = '';
+                    let cartCount = 0;
                     for (let id in cart) {
+                        cartCount++;
                         const item = cart[id];
                         subtotal += item.price * item.qty;
                         itemsHtml += `
@@ -481,6 +482,18 @@
 
                     const tax = subtotal * 0.10;
                     const grandTotal = subtotal + tax;
+
+                    if (cartCount === 0) {
+                        itemsHtml = `
+                            <div class="flex flex-col items-center justify-center py-12 px-4 text-center">
+                                <div class="w-20 h-20 bg-[#FDFBF7] rounded-full flex items-center justify-center mb-4 border border-[#EAE3D9]">
+                                    <i class="fas fa-shopping-basket text-3xl text-[#D0C8BF]"></i>
+                                </div>
+                                <h3 class="text-secondary font-black text-lg mb-1">Keranjang Kosong</h3>
+                                <p class="text-[#8C837C] text-xs font-medium">Belum ada menu yang Anda pilih.</p>
+                            </div>
+                        `;
+                    }
 
                     panel.innerHTML = `
                         <div class="flex justify-between items-center mb-4 pb-3 border-b border-[#EAE3D9] px-2 pt-2">
@@ -541,7 +554,7 @@
                                 </div>
                             </div>
 
-                            <button id="btn-checkout" onclick="processCheckout()" ${isProcessingCheckout ? 'disabled' : ''} class="w-full bg-secondary hover:bg-[#20150F] text-white font-bold py-4 rounded-2xl flex justify-center items-center gap-2 transition-all shadow-xl shadow-secondary/20 active:scale-95 uppercase tracking-wider text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                            <button id="btn-checkout" onclick="processCheckout()" ${isProcessingCheckout || cartCount === 0 ? 'disabled' : ''} class="w-full bg-secondary hover:bg-[#20150F] text-white font-bold py-4 rounded-2xl flex justify-center items-center gap-2 transition-all shadow-xl shadow-secondary/20 active:scale-95 uppercase tracking-wider text-sm disabled:opacity-50 disabled:cursor-not-allowed">
                                 <i id="btn-checkout-icon" class="${isProcessingCheckout ? 'fas fa-circle-notch fa-spin text-white' : 'fas fa-check-circle text-primary text-sm'}"></i> <span id="btn-checkout-text">${isProcessingCheckout ? 'Memproses...' : 'Bayar Sekarang'}</span>
                             </button>
                         </div>`;
