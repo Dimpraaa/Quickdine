@@ -54,15 +54,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Menu::create([
-            'category_id' => $kopi->id,
-            'name' => 'Americano Dingin',
-            'description' => 'Double shot espresso dengan air dingin.',
-            'price' => 18000,
-            'stock' => 100,
-            'image_url' => 'https://images.unsplash.com/photo-1517701550927-30cfcb64c5ed?w=200&q=80'
-        ]);
-
-        Menu::create([
             'category_id' => $nonKopi->id,
             'name' => 'Matcha Latte',
             'description' => 'Teh hijau matcha premium dengan susu segar.',
