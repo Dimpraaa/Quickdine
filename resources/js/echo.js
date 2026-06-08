@@ -12,3 +12,7 @@ window.Echo = new Echo({
     forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
     enabledTransports: ['ws', 'wss'],
 });
+
+// Menghapus window.Pusher setelah Echo selesai diinisialisasi 
+// agar tidak bentrok dengan internal Pusher milik Midtrans Snap
+delete window.Pusher;
