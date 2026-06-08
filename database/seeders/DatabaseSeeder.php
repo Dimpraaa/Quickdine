@@ -13,19 +13,23 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        User::create([
-            'name' => 'Admin QuickDine',
-            'email' => 'admin@quickdine.com',
-            'password' => Hash::make('password123'),
-            'role' => 'admin',
-        ]);
+        User::firstOrCreate(
+            ['email' => 'admin@quickdine.com'],
+            [
+                'name' => 'Admin QuickDine',
+                'password' => Hash::make('password123'),
+                'role' => 'admin',
+            ]
+        );
 
-        User::create([
-            'name' => 'Staf Operasional',
-            'email' => 'staf@quickdine.com',
-            'password' => Hash::make('password123'),
-            'role' => 'staff',
-        ]);
+        User::firstOrCreate(
+            ['email' => 'staf@quickdine.com'],
+            [
+                'name' => 'Staf Operasional',
+                'password' => Hash::make('password123'),
+                'role' => 'staff',
+            ]
+        );
 
         Table::create([
             'table_number' => 1,
