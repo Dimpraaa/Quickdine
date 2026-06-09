@@ -197,6 +197,10 @@ class OrderController extends Controller
             
             if (!$order) {
                 DB::rollBack();
+                // Jika ini adalah notifikasi test dari dashboard Midtrans, kembalikan 200 OK agar tidak error
+                if (str_contains($request->order_id, 'test')) {
+                    return response()->json(['message' => 'Test Notification Accepted'], 200);
+                }
                 return response()->json(['message' => 'Order not found'], 404);
             }
 
