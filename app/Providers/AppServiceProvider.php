@@ -20,6 +20,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Illuminate\Support\Facades\Mail::extend('brevo', function (array $config) {
+            return \Symfony\Component\Mailer\Transport::fromDsn(env('BREVO_DSN'));
+        });
+
         Paginator::useTailwind();
 
         // Setup Midtrans Configuration globally
