@@ -94,6 +94,11 @@ MIDTRANS_IS_PRODUCTION=false
 # Konfigurasi Reverb (Otomatis dari Laravel)
 REVERB_APP_ID=...
 REVERB_APP_KEY=...
+
+# Konfigurasi Email (Brevo API)
+MAIL_MAILER=brevo
+BREVO_DSN="brevo+api://API_KEY_ANDA@default"
+MAIL_FROM_ADDRESS="email_anda@gmail.com"
 ```
 
 ### 4. Database Migration & Seeding
@@ -143,8 +148,23 @@ _Catatan: Copy URL Ngrok (https) yang muncul dan masukkan ke Dashboard Midtrans 
 
 Setelah Anda menjalankan `php artisan migrate --seed`, Anda dapat masuk menggunakan akun berikut:
 
+**Akun Administrator:**
 - **Email:** `admin@quickdine.com`
 - **Password:** `password123`
+
+**Akun Staf (Dapur/Kitchen):**
+- **Email:** `staf@quickdine.com`
+- **Password:** `password123`
+
+---
+
+## Deployment (Production / Railway)
+
+Jika Anda ingin men-deploy aplikasi ini ke server cloud (seperti Railway), pastikan Anda menyetel *Environment Variables* berikut di dashboard layanan cloud Anda:
+
+1. **Email OTP:** Gunakan `MAIL_MAILER=brevo` dan atur `BREVO_DSN` agar pengiriman email tidak diblokir oleh provider cloud (port 587/465 biasanya diblokir).
+2. **WebSockets:** Pastikan layanan Reverb dijalankan sebagai *background worker* terpisah (menggunakan `php artisan reverb:start`) atau gunakan layanan Pusher jika tidak ingin mengelola server WebSocket sendiri.
+3. **Database:** Atur variabel `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, dan `DB_PASSWORD` sesuai dengan database cloud yang disediakan.
 
 ---
 
