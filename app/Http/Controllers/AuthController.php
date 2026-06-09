@@ -83,21 +83,8 @@ class AuthController extends Controller
             'role' => 'customer',
         ]);
 
-        // Langsung login setelah daftar
-        Auth::login($user);
-
-        // CLAIM: Ambil alih pesanan guest ke akun baru
-        $guestOrderIds = session('guest_order_ids', []);
-        if (!empty($guestOrderIds)) {
-            Order::whereIn('id', $guestOrderIds)
-                ->whereNull('user_id')
-                ->update(['user_id' => $user->id]);
-            session()->forget('guest_order_ids');
-        }
-
-        // Ambil nomor meja dari sesi (disimpan dari MenuController), fallback ke 1 jika kosong
-        $tableNumber = session('current_table', 1);
-        return redirect()->route('menu.index', ['table_number' => $tableNumber]);
+        // Jangan auto-login. Arahkan ke halaman login dengan pesan sukses.
+        return redirect()->route('login')->with('success', 'Pendaftaran berhasil! Silakan login dengan akun baru Anda.');
     }
 
     /**
