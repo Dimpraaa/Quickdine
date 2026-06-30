@@ -29,7 +29,10 @@ class OrderService
             $subtotal = 0;
             $verifiedCart = [];
             
-            foreach ($validatedData['cart'] as $item) {
+            // Urutkan item berdasarkan id untuk mencegah deadlock MySQL saat row-locking
+            $sortedCart = collect($validatedData['cart'])->sortBy('id')->all();
+            
+            foreach ($sortedCart as $item) {
                 // PESSIMISTIC LOCKING: lockForUpdate()
                 $menu = Menu::lockForUpdate()->findOrFail($item['id']);
                 
