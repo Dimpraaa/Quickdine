@@ -95,7 +95,7 @@
     </div>
 </div>
 
-<div class="bg-white rounded-2xl border border-borderColor shadow-sm overflow-hidden">
+<div id="table-container" class="bg-white rounded-2xl border border-borderColor shadow-sm overflow-hidden transition-opacity duration-300">
     <div class="overflow-x-auto">
         <table class="w-full text-left">
             <thead>
@@ -140,7 +140,7 @@
                     <td class="px-8 py-5 text-sm font-bold text-secondary/80 uppercase">{{ $order->payment_method }}</td>
                     <td class="px-8 py-5 text-right font-black text-secondary">Rp {{ number_format($order->total_price, 0, ',', '.') }}</td>
                     <td class="px-8 py-5 text-center">
-                        <button onclick="window.open('{{ route('order.receipt', $order->id) }}', 'CetakStruk', 'width=400,height=600')" class="bg-white border border-borderColor text-secondary/60 hover:text-primary hover:bg-bgLight p-2 rounded-lg transition-colors">
+                        <button onclick="window.open('{{ route('order.receipt', $order->transaction_id) }}', 'CetakStruk', 'width=400,height=600')" class="bg-white border border-borderColor text-secondary/60 hover:text-primary hover:bg-bgLight p-2 rounded-lg transition-colors">
                             <i class="fas fa-print"></i>
                         </button>
                     </td>
@@ -218,6 +218,42 @@
                         }
                     }
                 }
+            }
+        });
+
+        // AJAX Pagination
+        document.addEventListener('click', function(e) {
+            const link = e.target.closest('#table-container nav[role="navigation"] a');
+            if (link) {
+                e.preventDefault();
+                const url = link.href;
+                
+                const tableContainer = document.getElementById('table-container');
+                tableContainer.style.opacity = '0.5';
+
+                fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newContainer = doc.getElementById('table-container');
+                    
+                    if (newContainer) {
+                        tableContainer.innerHTML = newContainer.innerHTML;
+                        window.history.pushState({}, '', url);
+                    }
+                })
+                .catch(error => {
+                    console.error('AJAX Pagination Error:', error);
+                    window.location.href = url; // fallback
+                })
+                .finally(() => {
+                    tableContainer.style.opacity = '1';
+                });
             }
         });
     });

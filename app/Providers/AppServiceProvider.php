@@ -21,7 +21,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         \Illuminate\Support\Facades\Mail::extend('brevo', function (array $config) {
-            return \Symfony\Component\Mailer\Transport::fromDsn(env('BREVO_DSN'));
+            $transport = new \Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport(
+                env('MAIL_HOST', 'smtp-relay.brevo.com'),
+                (int) env('MAIL_PORT', 587),
+                null // auto-detect: STARTTLS untuk port 587
+            );
+            $transport->setUsername(env('MAIL_USERNAME'));
+            $transport->setPassword(env('MAIL_PASSWORD'));
+            return $transport;
         });
 
         Paginator::useTailwind();

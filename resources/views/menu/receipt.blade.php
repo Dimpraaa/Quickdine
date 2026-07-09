@@ -5,19 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Struk - {{ $order->transaction_id }}</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
         body {
             font-family: 'Courier New', Courier, monospace;
             margin: 0;
             padding: 10px;
             text-align: center;
             color: #000;
+            background: #fff;
         }
 
         .receipt {
-            width: 100%;
-            max-width: 300px;
+            width: 80mm; /* Standar industri Thermal 80mm */
+            max-width: 80mm;
             margin: 0 auto;
             text-align: left;
+            padding: 5mm;
         }
 
         .text-center { text-align: center; }
@@ -28,7 +33,7 @@
         
         .divider {
             border-top: 1px dashed #000;
-            margin: 10px 0;
+            margin: 8px 0;
         }
 
         table {
@@ -41,8 +46,22 @@
             word-wrap: break-word;
         }
 
+        @media print {
+            body {
+                padding: 0;
+                margin: 0;
+            }
+            .receipt {
+                width: 100%;
+                max-width: 100%;
+                padding: 0;
+                margin: 0;
+            }
+        }
+
         @page {
             margin: 0;
+            size: 80mm auto; /* Memaksa browser ke ukuran kertas 80mm */
         }
     </style>
 </head>

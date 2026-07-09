@@ -38,7 +38,6 @@
 @endpush
 
 @section('content')
-<div id="local-network-warning" class="no-print"></div>
 
 <header class="flex justify-between items-center mb-8 no-print">
     <div>
@@ -162,22 +161,5 @@
     window.onclick = function(event) {
         if (event.target == document.getElementById('addModal')) closeAddModal();
     }
-
-    // Warning jika diakses dari localhost
-    document.addEventListener('DOMContentLoaded', function() {
-        const hostname = window.location.hostname;
-        if (hostname === '127.0.0.1' || hostname === 'localhost') {
-            document.getElementById('local-network-warning').innerHTML = `
-                <div class="mb-6 p-4 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-xl shadow-sm flex gap-3 no-print">
-                    <i class="fas fa-exclamation-circle text-xl text-yellow-600 mt-0.5"></i>
-                    <div>
-                        <h4 class="font-bold mb-1">Testing QR Code di Handphone?</h4>
-                        <p class="text-sm">Anda saat ini mengakses melalui <strong>${hostname}</strong>. Jika Anda scan QR ini menggunakan handphone, browser HP akan mencoba membuka localhost di HP itu sendiri (dan gagal).</p>
-                        <p class="text-sm mt-1">Untuk testing di HP: Jalankan server dengan <code>php artisan serve --host=0.0.0.0</code> lalu buka halaman ini menggunakan IP WiFi komputer Anda (contoh: <code>192.168.1.5:8000</code>). Atau cukup <strong>klik gambar QR Code</strong> untuk membukanya di tab baru PC Anda.</p>
-                    </div>
-                </div>
-            `;
-        }
-    });
 </script>
 @endpush

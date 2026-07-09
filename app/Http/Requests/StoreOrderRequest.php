@@ -29,7 +29,8 @@ class StoreOrderRequest extends FormRequest
             'cart' => 'required|array',
             'cart.*.id' => 'required|exists:menus,id',
             'cart.*.qty' => 'required|integer|min:1',
-            'cart.*.price' => 'required|numeric'
+            'cart.*.price' => 'required|numeric',
+            'cart.*.notes' => 'nullable|string|max:255'
         ];
     }
 }
